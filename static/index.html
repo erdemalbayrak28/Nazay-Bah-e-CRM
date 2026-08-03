@@ -99,9 +99,15 @@
                     <h3>Toplam Etkinlik</h3>
                     <p id="statTotalEvents">0</p>
                 </div>
-                <div class="stat-card">
-                    <h3>Toplam Ciro</h3>
+                <div class="stat-card clickable-stat" id="statRevenueCard" title="Ciro detaylarını görmek için tıklayın">
+                    <h3>Toplam Ciro <span>🔍</span></h3>
                     <p id="statTotalRevenue">0 TL</p>
+                    <span class="stat-subtext">(Gerçekleşen Etkinlikler)</span>
+                </div>
+                <div class="stat-card clickable-stat" id="statDepositCard" title="Kapora detaylarını görmek için tıklayın">
+                    <h3>Verilen Kaporalar <span>🔍</span></h3>
+                    <p id="statTotalDeposit">0 TL</p>
+                    <span class="stat-subtext">(Detaylar için tıklayın)</span>
                 </div>
                 <div class="stat-card">
                     <h3>Bekleyen Tahsilat</h3>
@@ -255,6 +261,18 @@
         </div>
     </div>
 
-    <script src="/static/app.js?v=7"></script>
+    <!-- Stat Details Modal -->
+    <div id="statDetailsModal" class="modal">
+        <div class="modal-content" style="max-width: 650px;">
+            <span class="close-modal stat-details-close">&times;</span>
+            <h2 id="statDetailsTitle">Detay Listesi</h2>
+            <div id="statDetailsContent" style="max-height: 420px; overflow-y: auto; margin-top: 1rem;">
+                <!-- Populated via JS -->
+            </div>
+            <button id="closeStatDetailsBtn" class="btn btn-primary full-width" style="margin-top: 1rem;">Kapat</button>
+        </div>
+    </div>
+
+    <script src="/static/app.js?v=8"></script>
 </body>
 </html>

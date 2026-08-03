@@ -263,7 +263,32 @@ closeViewBtns.forEach(btn => {
 window.addEventListener('click', (e) => {
     if (e.target === modal) modal.classList.remove('show');
     if (e.target === viewModal) viewModal.classList.remove('show');
+    const statModal = document.getElementById('statDetailsModal');
+    if (statModal && e.target === statModal) statModal.classList.remove('show');
 });
+
+const closeStatDetailsBtn = document.getElementById('closeStatDetailsBtn');
+const statDetailsClose = document.querySelector('.stat-details-close');
+if (closeStatDetailsBtn) {
+    closeStatDetailsBtn.addEventListener('click', () => {
+        document.getElementById('statDetailsModal').classList.remove('show');
+    });
+}
+if (statDetailsClose) {
+    statDetailsClose.addEventListener('click', () => {
+        document.getElementById('statDetailsModal').classList.remove('show');
+    });
+}
+
+const statRevenueCard = document.getElementById('statRevenueCard');
+if (statRevenueCard) {
+    statRevenueCard.addEventListener('click', openRevenueDetails);
+}
+
+const statDepositCard = document.getElementById('statDepositCard');
+if (statDepositCard) {
+    statDepositCard.addEventListener('click', openDepositDetails);
+}
 
 searchInput.addEventListener('input', (e) => {
     const term = e.target.value.toLowerCase().trim();
@@ -446,12 +471,23 @@ function calculateStats(customers) {
     document.getElementById('statTotalEvents').textContent = customers.length;
 
     let totalRev = 0;
+    let totalDeposit = 0;
     let pending = 0;
     const sources = {};
 
     customers.forEach(c => {
-        totalRev += (c.toplam_fiyat || 0);
-        pending += ((c.toplam_fiyat || 0) - (c.alinan_avans || 0) - (c.alinan_odeme || 0));
+        // Sadece "Etkinlik Gerçekleşti" olanlar ciroya eklenir
+        if (c.durum === 'Etkinlik Gerçekleşti') {
+            totalRev += (c.toplam_fiyat || 0);
+        }
+
+        // Verilen kaporalar
+        totalDeposit += (c.alinan_avans || 0);
+
+        // Bekleyen tahsilat (İptal edilmeyenler)
+        if (c.durum !== 'İptal') {
+            pending += ((c.toplam_fiyat || 0) - (c.alinan_avans || 0) - (c.alinan_odeme || 0));
+        }
 
         if (c.kaynak) {
             sources[c.kaynak] = (sources[c.kaynak] || 0) + 1;
@@ -459,6 +495,12 @@ function calculateStats(customers) {
     });
 
     document.getElementById('statTotalRevenue').textContent = totalRev.toLocaleString('tr-TR') + ' TL';
+    
+    const depositEl = document.getElementById('statTotalDeposit');
+    if (depositEl) {
+        depositEl.textContent = totalDeposit.toLocaleString('tr-TR') + ' TL';
+    }
+
     document.getElementById('statPendingBalance').textContent = pending.toLocaleString('tr-TR') + ' TL';
 
     // Find top source
@@ -471,6 +513,96 @@ function calculateStats(customers) {
         }
     }
     document.getElementById('statTopSource').textContent = topSource;
+}
+
+// Stat Detail Modals
+function openRevenueDetails() {
+    const revenueCustomers = allCustomers.filter(c => c.durum === 'Etkinlik Gerçekleşti');
+    const modal = document.getElementById('statDetailsModal');
+    const title = document.getElementById('statDetailsTitle');
+    const content = document.getElementById('statDetailsContent');
+
+    title.textContent = 'Ciro Yapan Müşteriler (Etkinlik Gerçekleşti)';
+
+    if (revenueCustomers.length === 0) {
+        content.innerHTML = '<p style="text-align:center; color:#64748b; padding:1.5rem;">"Etkinlik Gerçekleşti" durumunda müşteri bulunamadı.</p>';
+    } else {
+        let html = `
+            <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.9rem;">
+                <thead>
+                    <tr style="border-bottom: 2px solid var(--border-color); color:#64748b; font-size:0.8rem;">
+                        <th style="padding:0.6rem;">Müşteri</th>
+                        <th style="padding:0.6rem;">Etkinlik</th>
+                        <th style="padding:0.6rem;">Tarih</th>
+                        <th style="padding:0.6rem;">Ciro Tutar</th>
+                        <th style="padding:0.6rem;">Kalan</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        revenueCustomers.forEach(c => {
+            const toplam = c.toplam_fiyat || 0;
+            const kalan = toplam - (c.alinan_avans || 0) - (c.alinan_odeme || 0);
+            html += `
+                <tr style="border-bottom: 1px solid #f1f5f9; cursor:pointer;" onclick="viewCustomer(${c.id}); document.getElementById('statDetailsModal').classList.remove('show');">
+                    <td style="padding:0.6rem;"><strong>${c.ad_soyad}</strong> ${formatWaLink(c.telefon)}</td>
+                    <td style="padding:0.6rem;">${c.etkinlik_adi || '-'}</td>
+                    <td style="padding:0.6rem;">${c.etkinlik_tarihi ? formatDate(c.etkinlik_tarihi) : '-'}</td>
+                    <td style="padding:0.6rem; color:#10b981; font-weight:700;">${toplam.toLocaleString('tr-TR')} TL</td>
+                    <td style="padding:0.6rem;">${kalan <= 0 ? '<span style="color:#10b981; font-weight:600;">Tamamı Ödendi</span>' : `<span style="color:#ef4444; font-weight:600;">${kalan.toLocaleString('tr-TR')} TL</span>`}</td>
+                </tr>
+            `;
+        });
+
+        html += '</tbody></table>';
+        content.innerHTML = html;
+    }
+
+    modal.classList.add('show');
+}
+
+function openDepositDetails() {
+    const depositCustomers = allCustomers.filter(c => (c.alinan_avans || 0) > 0);
+    const modal = document.getElementById('statDetailsModal');
+    const title = document.getElementById('statDetailsTitle');
+    const content = document.getElementById('statDetailsContent');
+
+    title.textContent = 'Kapora Veren Müşteriler';
+
+    if (depositCustomers.length === 0) {
+        content.innerHTML = '<p style="text-align:center; color:#64748b; padding:1.5rem;">Kapora veren müşteri bulunamadı.</p>';
+    } else {
+        let html = `
+            <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.9rem;">
+                <thead>
+                    <tr style="border-bottom: 2px solid var(--border-color); color:#64748b; font-size:0.8rem;">
+                        <th style="padding:0.6rem;">Müşteri</th>
+                        <th style="padding:0.6rem;">Verilen Kapora</th>
+                        <th style="padding:0.6rem;">Etkinlik</th>
+                        <th style="padding:0.6rem;">Durum</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        depositCustomers.forEach(c => {
+            const avans = c.alinan_avans || 0;
+            html += `
+                <tr style="border-bottom: 1px solid #f1f5f9; cursor:pointer;" onclick="viewCustomer(${c.id}); document.getElementById('statDetailsModal').classList.remove('show');">
+                    <td style="padding:0.6rem;"><strong>${c.ad_soyad}</strong> ${formatWaLink(c.telefon)}</td>
+                    <td style="padding:0.6rem; color:#2563eb; font-weight:700;">${avans.toLocaleString('tr-TR')} TL</td>
+                    <td style="padding:0.6rem;">${c.etkinlik_adi || '-'}</td>
+                    <td style="padding:0.6rem;"><span class="badge ${getBadgeClass(c.durum)}">${c.durum}</span></td>
+                </tr>
+            `;
+        });
+
+        html += '</tbody></table>';
+        content.innerHTML = html;
+    }
+
+    modal.classList.add('show');
 }
 
 // Render Calendar

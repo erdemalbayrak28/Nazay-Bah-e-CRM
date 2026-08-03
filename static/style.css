@@ -194,17 +194,41 @@ body {
     border: 1px solid var(--border-color);
 }
 
+.clickable-stat {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid var(--border-color);
+}
+
+.clickable-stat:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.15);
+    border-color: var(--primary-color);
+    background: #f8fafc;
+}
+
 .stat-card h3 {
     font-size: 0.875rem;
     color: #64748b;
     margin-bottom: 0.5rem;
     text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .stat-card p {
     font-size: 1.5rem;
     font-weight: 700;
     color: #0f172a;
+}
+
+.stat-subtext {
+    font-size: 0.72rem;
+    color: #64748b;
+    font-weight: 500;
+    margin-top: 0.25rem;
+    display: block;
 }
 
 /* View Tabs */
