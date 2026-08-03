@@ -10,8 +10,21 @@ import os
 import sqlalchemy
 
 # --- Database Setup ---
-DATABASE_URL = "sqlite:///./database.db"
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./database.db")
+
+# Railway PostgreSQL URL'leri "postgres://" ile başlar, SQLAlchemy "postgresql://" ister
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+# PostgreSQL için check_same_thread parametresi gerekmez
+if DATABASE_URL.startswith("sqlite"):
+    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+else:
+    engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
