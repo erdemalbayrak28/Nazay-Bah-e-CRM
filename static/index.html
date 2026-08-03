@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nazay Bahçe CRM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/tr.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="/static/style.css?v=7">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Nazay Bahçe</h2>
+                <p>CRM Paneli</p>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <h3>Filtreler (Kaynak)</h3>
+                <ul id="sourceFilters">
+                    <li><button class="filter-btn active" data-filter="all" data-type="kaynak">Tüm Müşteriler</button></li>
+                    <li><button class="filter-btn" data-filter="Instagram" data-type="kaynak">Instagram Listesi</button></li>
+                    <li><button class="filter-btn" data-filter="WhatsApp" data-type="kaynak">WhatsApp Listesi</button></li>
+                    <li><button class="filter-btn" data-filter="Telefon" data-type="kaynak">Telefon Listesi</button></li>
+                    <li><button class="filter-btn" data-filter="Yüz Yüze" data-type="kaynak">Yüz Yüze Gelenler</button></li>
+                </ul>
+
+                <h3>Filtreler (Durum)</h3>
+                <ul id="statusFilters">
+                    <li><button class="filter-btn active" data-filter="all" data-type="durum">Tüm Durumlar</button></li>
+                    <li><button class="filter-btn" data-filter="Yeni Ulaştı" data-type="durum">Yeni Ulaştı</button></li>
+                    <li><button class="filter-btn" data-filter="Görüşüldü" data-type="durum">Görüşüldü</button></li>
+                    <li><button class="filter-btn" data-filter="Randevu Oluşturuldu" data-type="durum">Randevu Oluşturuldu</button></li>
+                    <li><button class="filter-btn" data-filter="Etkinlik Gerçekleşti" data-type="durum">Etkinlik Gerçekleşti</button></li>
+                    <li><button class="filter-btn" data-filter="İptal" data-type="durum">İptal</button></li>
+                </ul>
+
+                <h3>Filtreler (Etkinlik Adı)</h3>
+                <ul id="eventFilters">
+                    <li><button class="filter-btn active" data-filter="all" data-type="etkinlik_adi">Tüm Etkinlikler</button></li>
+                    <li><button class="filter-btn" data-filter="Nişan" data-type="etkinlik_adi">Nişan</button></li>
+                    <li><button class="filter-btn" data-filter="Kına" data-type="etkinlik_adi">Kına</button></li>
+                    <li><button class="filter-btn" data-filter="Kahvaltı" data-type="etkinlik_adi">Kahvaltı</button></li>
+                    <li><button class="filter-btn" data-filter="Bride to Be" data-type="etkinlik_adi">Bride to Be</button></li>
+                    <li><button class="filter-btn" data-filter="Doğum Günü" data-type="etkinlik_adi">Doğum Günü</button></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="topbar">
+                <h1>Müşteriler</h1>
+                <div class="topbar-actions" style="display: flex; gap: 1rem; align-items: center;">
+                    <div class="search-wrapper">
+                        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input type="text" id="searchInput" class="search-input" placeholder="İsim ile müşteri ara...">
+                    </div>
+                    <button id="exportExcelBtn" class="btn btn-success">Excel'e Aktar</button>
+                    <button id="addCustomerBtn" class="btn btn-primary">+ Yeni Müşteri Ekle</button>
+                </div>
+            </header>
+
+            <!-- Dashboard Stats -->
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <h3>Toplam Etkinlik</h3>
+                    <p id="statTotalEvents">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Toplam Ciro</h3>
+                    <p id="statTotalRevenue">0 TL</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Bekleyen Tahsilat</h3>
+                    <p id="statPendingBalance">0 TL</p>
+                </div>
+                <div class="stat-card">
+                    <h3>En Çok Kaynak</h3>
+                    <p id="statTopSource">-</p>
+                </div>
+            </div>
+
+            <!-- View Tabs -->
+            <div class="view-tabs">
+                <button class="tab-btn active" data-view="list">Liste Görünümü</button>
+                <button class="tab-btn" data-view="calendar">Takvim Görünümü</button>
+            </div>
+
+            <!-- Loading Spinner (hidden by default) -->
+            <div id="loading" class="loading-spinner" style="display: none;">Veriler Yükleniyor...</div>
+
+            <!-- Toast Container -->
+            <div id="toastContainer" class="toast-container"></div>
+
+            <!-- List View -->
+            <section id="listView" class="table-container">
+                <table id="customersTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Ad Soyad</th>
+                            <th>Telefon</th>
+                            <th>Kaynak</th>
+                            <th>Etkinlik Adı</th>
+                            <th>Kişi</th>
+                            <th>Fiyat / Kalan</th>
+                            <th>Durum</th>
+                            <th>Etkinlik Tarihi</th>
+                            <th>Notlar</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customersTableBody">
+                        <!-- Data will be populated here via JS -->
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Calendar View -->
+            <section id="calendarView" style="display: none; background: white; padding: 1.5rem; border-radius: 0.5rem; border: 1px solid var(--border-color);">
+                <div id="calendar"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal Form -->
+    <div id="customerModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 id="modalTitle">Yeni Müşteri Ekle</h2>
+            <form id="customerForm">
+                <input type="hidden" id="customerId">
+                
+                <div class="form-group">
+                    <label for="ad_soyad">Ad Soyad</label>
+                    <input type="text" id="ad_soyad" name="ad_soyad" required placeholder="Müşterinin Adı Soyadı">
+                </div>
+
+                <div class="form-group">
+                    <label for="telefon">Telefon</label>
+                    <input type="text" id="telefon" name="telefon" required placeholder="05XX XXX XX XX">
+                </div>
+
+                <div class="form-group">
+                    <label for="kaynak">Kaynak</label>
+                    <select id="kaynak" name="kaynak" required>
+                        <option value="Instagram">Instagram</option>
+                        <option value="WhatsApp">WhatsApp</option>
+                        <option value="Telefon">Telefon</option>
+                        <option value="Yüz Yüze">Yüz Yüze</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="durum">Durum</label>
+                    <select id="durum" name="durum" required>
+                        <option value="Yeni Ulaştı">Yeni Ulaştı</option>
+                        <option value="Görüşüldü">Görüşüldü</option>
+                        <option value="Randevu Oluşturuldu">Randevu Oluşturuldu</option>
+                        <option value="Etkinlik Gerçekleşti">Etkinlik Gerçekleşti</option>
+                        <option value="İptal">İptal</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="etkinlik_adi">Etkinlik Adı (Opsiyonel)</label>
+                    <select id="etkinlik_adi" name="etkinlik_adi">
+                        <option value="">Belirtilmemiş</option>
+                        <option value="Nişan">Nişan</option>
+                        <option value="Kına">Kına</option>
+                        <option value="Kahvaltı">Kahvaltı</option>
+                        <option value="Bride to Be">Bride to Be</option>
+                        <option value="Doğum Günü">Doğum Günü</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <div class="form-group" style="flex: 1; min-width: 150px;">
+                        <label for="etkinlik_tarihi">Etkinlik Tarihi (Opsiyonel)</label>
+                        <input type="date" id="etkinlik_tarihi" name="etkinlik_tarihi">
+                    </div>
+                    <div class="form-group" style="flex: 1; min-width: 100px;">
+                        <label for="kisi_sayisi">Kişi Sayısı</label>
+                        <input type="number" id="kisi_sayisi" name="kisi_sayisi" min="0" placeholder="Örn: 100">
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <div class="form-group" style="flex: 1; min-width: 120px;">
+                        <label for="toplam_fiyat">Toplam Fiyat (TL)</label>
+                        <input type="number" id="toplam_fiyat" name="toplam_fiyat" value="0" min="0">
+                    </div>
+                    <div class="form-group" style="flex: 1; min-width: 120px;">
+                        <label for="alinan_avans">Kapora (TL)</label>
+                        <input type="number" id="alinan_avans" name="alinan_avans" value="0" min="0">
+                    </div>
+                    <div class="form-group" style="flex: 1; min-width: 120px;">
+                        <label for="alinan_odeme">Alınan Ödeme (TL)</label>
+                        <input type="number" id="alinan_odeme" name="alinan_odeme" value="0" min="0">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="notlar">Notlar (Opsiyonel)</label>
+                    <textarea id="notlar" name="notlar" rows="3" placeholder="Müşteri hakkında notlar..."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary full-width">Kaydet</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- View Modal -->
+    <div id="viewCustomerModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal view-close">&times;</span>
+            <h2>Müşteri Detayları</h2>
+            <div id="viewCustomerDetails" class="customer-details">
+                <!-- Populated via JS -->
+            </div>
+            <button id="closeViewBtn" class="btn btn-primary full-width" style="margin-top: 1rem;">Kapat</button>
+        </div>
+    </div>
+
+    <script src="/static/app.js?v=7"></script>
+</body>
+</html>
