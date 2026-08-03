@@ -8,10 +8,9 @@ from datetime import date
 from typing import Optional, List
 import os
 import sqlalchemy
+from dotenv import load_dotenv
 
 # --- Database Setup ---
-import os
-from dotenv import load_dotenv
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./database.db")
