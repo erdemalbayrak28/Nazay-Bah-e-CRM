@@ -1,5 +1,62 @@
 const API_BASE = '/api/customers';
 
+// ==================== AUTH ====================
+function getToken() { return localStorage.getItem('crm_token'); }
+function setToken(t) { localStorage.setItem('crm_token', t); }
+function clearToken() { localStorage.removeItem('crm_token'); }
+
+function authHeaders() {
+    return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() };
+}
+
+async function apiFetch(url, options = {}) {
+    options.headers = { ...authHeaders(), ...(options.headers || {}) };
+    const res = await fetch(url, options);
+    if (res.status === 401) { logout(); return null; }
+    return res;
+}
+
+function logout() {
+    clearToken();
+    document.getElementById('loginOverlay').style.display = 'flex';
+    document.getElementById('loginError').style.display = 'none';
+    document.getElementById('loginUsername').value = '';
+    document.getElementById('loginPassword').value = '';
+}
+
+// Login Form Handler
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('loginBtn');
+    btn.textContent = 'Giriş yapılıyor...';
+    btn.disabled = true;
+    const username = document.getElementById('loginUsername').value;
+    const password = document.getElementById('loginPassword').value;
+    try {
+        const res = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+        if (res.ok) {
+            const data = await res.json();
+            setToken(data.access_token);
+            document.getElementById('loginOverlay').style.display = 'none';
+            fetchCustomers();
+        } else {
+            document.getElementById('loginError').style.display = 'block';
+        }
+    } catch {
+        document.getElementById('loginError').style.display = 'block';
+    }
+    btn.textContent = 'Giriş Yap';
+    btn.disabled = false;
+});
+
+document.getElementById('logoutBtn').addEventListener('click', logout);
+
+// ==================== APP ====================
+
 // Elements
 const customersTableBody = document.getElementById('customersTableBody');
 const loading = document.getElementById('loading');
@@ -25,11 +82,17 @@ let currentSourceFilter = null;
 let currentStatusFilter = null;
 let currentEventFilter = null;
 
-// Initial Load
+// Initial Load — token yoksa login göster, varsa direkt yükle
 document.addEventListener('DOMContentLoaded', () => {
-    fetchCustomers();
+    if (!getToken()) {
+        document.getElementById('loginOverlay').style.display = 'flex';
+    } else {
+        document.getElementById('loginOverlay').style.display = 'none';
+        fetchCustomers();
+    }
     setupFilters();
 });
+
 
 // Fetch Customers
 async function fetchCustomers() {
@@ -43,7 +106,8 @@ async function fetchCustomers() {
 
         if (params.toString()) url += '?' + params.toString();
 
-        const response = await fetch(url);
+        const response = await apiFetch(url);
+        if (!response) return;
         allCustomers = await response.json();
 
         // If there's an active search, filter immediately
@@ -236,9 +300,8 @@ customerForm.addEventListener('submit', async (e) => {
         const url = isUpdate ? `${API_BASE}/${id}` : API_BASE;
         const method = isUpdate ? 'PUT' : 'POST';
 
-        const response = await fetch(url, {
+        const response = await apiFetch(url, {
             method: method,
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
 
@@ -257,7 +320,7 @@ customerForm.addEventListener('submit', async (e) => {
 // Edit Customer
 async function editCustomer(id) {
     try {
-        const response = await fetch(`${API_BASE}/${id}`);
+        const response = await apiFetch(`${API_BASE}/${id}`);
         if (response.ok) {
             const customer = await response.json();
 
@@ -286,7 +349,7 @@ async function editCustomer(id) {
 async function deleteCustomer(id) {
     if (confirm('Bu müşteriyi silmek istediğinize emin misiniz?')) {
         try {
-            const response = await fetch(`${API_BASE}/${id}`, {
+            const response = await apiFetch(`${API_BASE}/${id}`, {
                 method: 'DELETE'
             });
 
@@ -305,8 +368,8 @@ async function deleteCustomer(id) {
 // View Customer
 async function viewCustomer(id) {
     try {
-        const response = await fetch(`${API_BASE}/${id}`);
-        if (response.ok) {
+        const response = await apiFetch(`${API_BASE}/${id}`);
+        if (response && response.ok) {
             const customer = await response.json();
 
             viewCustomerDetails.innerHTML = `

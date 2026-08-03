@@ -1,16 +1,49 @@
-from fastapi import FastAPI, HTTPException, Query, Path
+from fastapi import FastAPI, HTTPException, Query, Path, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from sqlalchemy import create_engine, Column, Integer, String, Date, Text
 from sqlalchemy.orm import declarative_base, sessionmaker, Session
-from datetime import date
+from datetime import date, datetime, timedelta
 from typing import Optional, List
 import os
+import secrets
 import sqlalchemy
 from dotenv import load_dotenv
+from jose import JWTError, jwt
 
-# --- Database Setup ---
+# --- Auth Setup ---
+SECRET_KEY = os.getenv("SECRET_KEY", "nazay-bahce-super-gizli-anahtar-2024")
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_HOURS = 24
+
+VALID_USERNAME = "nazaybahce"
+VALID_PASSWORD = "Nazaybahce2834*"
+
+security = HTTPBearer()
+
+def create_access_token(data: dict):
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(hours=ACCESS_TOKEN_EXPIRE_HOURS)
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    try:
+        payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
+        username = payload.get("sub")
+        if username is None:
+            raise HTTPException(status_code=401, detail="Geçersiz token")
+        return username
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Geçersiz veya süresi dolmuş token")
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./database.db")
@@ -118,8 +151,17 @@ def get_db():
         db.close()
 
 # API Endpoints
+@app.post("/api/login")
+def login(request: LoginRequest):
+    username_ok = secrets.compare_digest(request.username, VALID_USERNAME)
+    password_ok = secrets.compare_digest(request.password, VALID_PASSWORD)
+    if not (username_ok and password_ok):
+        raise HTTPException(status_code=401, detail="Kullanıcı adı veya şifre hatalı")
+    token = create_access_token({"sub": request.username})
+    return {"access_token": token, "token_type": "bearer"}
+
 @app.post("/api/customers", response_model=CustomerResponse)
-def create_customer(customer: CustomerCreate):
+def create_customer(customer: CustomerCreate, current_user: str = Depends(verify_token)):
     db: Session = SessionLocal()
     db_customer = Customer(**customer.model_dump())
     db.add(db_customer)
@@ -129,7 +171,7 @@ def create_customer(customer: CustomerCreate):
     return db_customer
 
 @app.get("/api/customers", response_model=List[CustomerResponse])
-def get_customers(kaynak: Optional[str] = None, durum: Optional[str] = None, etkinlik_adi: Optional[str] = None):
+def get_customers(kaynak: Optional[str] = None, durum: Optional[str] = None, etkinlik_adi: Optional[str] = None, current_user: str = Depends(verify_token)):
     db: Session = SessionLocal()
     query = db.query(Customer)
     if kaynak:
@@ -143,7 +185,7 @@ def get_customers(kaynak: Optional[str] = None, durum: Optional[str] = None, etk
     return customers
 
 @app.get("/api/customers/{customer_id}", response_model=CustomerResponse)
-def get_customer(customer_id: int):
+def get_customer(customer_id: int, current_user: str = Depends(verify_token)):
     db: Session = SessionLocal()
     customer = db.query(Customer).filter(Customer.id == customer_id).first()
     db.close()
@@ -152,7 +194,7 @@ def get_customer(customer_id: int):
     return customer
 
 @app.put("/api/customers/{customer_id}", response_model=CustomerResponse)
-def update_customer(customer_id: int, customer: CustomerCreate):
+def update_customer(customer_id: int, customer: CustomerCreate, current_user: str = Depends(verify_token)):
     db: Session = SessionLocal()
     db_customer = db.query(Customer).filter(Customer.id == customer_id).first()
     if db_customer is None:
@@ -169,7 +211,7 @@ def update_customer(customer_id: int, customer: CustomerCreate):
     return db_customer
 
 @app.delete("/api/customers/{customer_id}")
-def delete_customer(customer_id: int):
+def delete_customer(customer_id: int, current_user: str = Depends(verify_token)):
     db: Session = SessionLocal()
     db_customer = db.query(Customer).filter(Customer.id == customer_id).first()
     if db_customer is None:

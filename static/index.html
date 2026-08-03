@@ -12,12 +12,36 @@
     <link rel="stylesheet" href="/static/style.css?v=7">
 </head>
 <body>
+
+    <!-- Login Overlay -->
+    <div id="loginOverlay" class="login-overlay">
+        <div class="login-card">
+            <div class="login-logo">
+                <span>🌿</span>
+            </div>
+            <h1 class="login-title">Nazay Bahçe</h1>
+            <p class="login-subtitle">CRM Paneline Hoş Geldiniz</p>
+            <form id="loginForm">
+                <div class="login-form-group">
+                    <label for="loginUsername">Kullanıcı Adı</label>
+                    <input type="text" id="loginUsername" placeholder="Kullanıcı adınızı girin" autocomplete="username" required>
+                </div>
+                <div class="login-form-group">
+                    <label for="loginPassword">Şifre</label>
+                    <input type="password" id="loginPassword" placeholder="Şifrenizi girin" autocomplete="current-password" required>
+                </div>
+                <div id="loginError" class="login-error" style="display:none;">Kullanıcı adı veya şifre hatalı!</div>
+                <button type="submit" class="login-btn" id="loginBtn">Giriş Yap</button>
+            </form>
+        </div>
+    </div>
     <div class="dashboard-container">
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h2>Nazay Bahçe</h2>
                 <p>CRM Paneli</p>
+                <button id="logoutBtn" class="logout-btn" title="Çıkış Yap">× Çıkış</button>
             </div>
             
             <nav class="sidebar-nav">
