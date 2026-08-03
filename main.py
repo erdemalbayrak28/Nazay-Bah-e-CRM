@@ -19,7 +19,7 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_HOURS = 24
 
 VALID_USERNAME = "nazaybahce"
-VALID_PASSWORD = "Nazaybahce2834*"
+VALID_PASSWORD = "1624nazay"
 
 security = HTTPBearer()
 
