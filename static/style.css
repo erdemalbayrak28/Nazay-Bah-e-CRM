@@ -731,3 +731,114 @@ tbody tr:hover {
 }
 
 .logout-btn:hover { background: rgba(239,68,68,0.28); }
+
+/* ==================== RESPONSIVE DESIGN (MOBILE) ==================== */
+@media (max-width: 768px) {
+    /* Dashboard Layout */
+    .dashboard-container {
+        grid-template-columns: 1fr;
+        min-height: auto;
+    }
+    
+    /* Sidebar adjustments */
+    .sidebar {
+        padding: 1rem;
+        gap: 1rem;
+    }
+
+    .sidebar-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .sidebar-header h2 { font-size: 1.3rem; }
+
+    .sidebar-nav h3 {
+        text-align: center;
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .sidebar-nav ul {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .filter-btn {
+        width: auto;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+        flex-grow: 1;
+        text-align: center;
+    }
+
+    /* Main Content */
+    .main-content {
+        padding: 1rem;
+    }
+
+    .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .topbar-actions {
+        width: 100%;
+        flex-direction: column !important; /* Override inline styles if any */
+        gap: 0.5rem !important;
+        align-items: stretch !important;
+    }
+
+    .search-wrapper {
+        width: 100%;
+    }
+
+    /* Table Scrolling */
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin-bottom: 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+    }
+
+    table {
+        min-width: 900px; /* Forces table to overflow horizontally */
+    }
+    
+    /* Stats */
+    .dashboard-stats {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    /* Modals */
+    .modal-content {
+        width: 95%;
+        padding: 1.25rem;
+        margin: 10% auto;
+    }
+    
+    .form-group[style*="flex"] {
+        min-width: 100% !important;
+    }
+
+    /* Login */
+    .login-card {
+        padding: 2rem 1.5rem;
+        width: 90%;
+    }
+    
+    .login-logo {
+        font-size: 2.5rem;
+    }
+    
+    .login-title {
+        font-size: 1.5rem;
+    }
+}
