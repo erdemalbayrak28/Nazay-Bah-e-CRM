@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/tr.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
-    <link rel="stylesheet" href="/static/style.css?v=7">
+    <link rel="stylesheet" href="/static/style.css?v=10">
 </head>
 <body>
 
@@ -157,6 +157,29 @@
 
             <!-- Calendar View -->
             <section id="calendarView" style="display: none; background: white; padding: 1.5rem; border-radius: 0.5rem; border: 1px solid var(--border-color);">
+                <!-- Monthly Financial Stats Bar for Calendar -->
+                <div id="calendarStatsBar" class="calendar-stats-bar">
+                    <div class="cal-stat-card">
+                        <span class="cal-stat-label">Bu Ayın Cirosu</span>
+                        <span class="cal-stat-value" id="calMonthRevenue">0 TL</span>
+                        <span class="cal-stat-sub">(Gerçekleşen Etkinlikler)</span>
+                    </div>
+                    <div class="cal-stat-card">
+                        <span class="cal-stat-label">Yatırılan Kapora</span>
+                        <span class="cal-stat-value" id="calMonthDeposit">0 TL</span>
+                        <span class="cal-stat-sub">(Bu Ayki Etkinlikler)</span>
+                    </div>
+                    <div class="cal-stat-card">
+                        <span class="cal-stat-label">Bekleyen Tahsilat</span>
+                        <span class="cal-stat-value" id="calMonthPending">0 TL</span>
+                        <span class="cal-stat-sub">(Kalan Bakiye)</span>
+                    </div>
+                    <div class="cal-stat-card">
+                        <span class="cal-stat-label">Toplam Etkinlik</span>
+                        <span class="cal-stat-value" id="calMonthCount">0</span>
+                        <span class="cal-stat-sub">(Bu Ay)</span>
+                    </div>
+                </div>
                 <div id="calendar"></div>
             </section>
         </main>
@@ -273,6 +296,6 @@
         </div>
     </div>
 
-    <script src="/static/app.js?v=8"></script>
+    <script src="/static/app.js?v=10"></script>
 </body>
 </html>

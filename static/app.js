@@ -230,7 +230,10 @@ function setupFilters() {
             } else {
                 listView.style.display = 'none';
                 calendarView.style.display = 'block';
-                if (calendar) calendar.render();
+                if (calendar) {
+                    calendar.render();
+                    if (calendar.view) updateMonthlyCalendarStats(calendar.view);
+                }
             }
         });
     });
@@ -606,7 +609,10 @@ function openDepositDetails() {
 }
 
 // Render Calendar
+let currentCalendarCustomers = [];
+
 function renderCalendar(customers) {
+    currentCalendarCustomers = customers;
     const calendarEl = document.getElementById('calendar');
     if (!calendarEl) return;
 
@@ -629,12 +635,17 @@ function renderCalendar(customers) {
         calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
             locale: 'tr',
+            showNonCurrentDates: false,
+            fixedWeekCount: false,
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',
                 right: 'dayGridMonth,timeGridWeek'
             },
             events: events,
+            datesSet: function (info) {
+                updateMonthlyCalendarStats(info.view);
+            },
             eventContent: function (arg) {
                 const p = arg.event.extendedProps;
                 let html = `<div class="custom-cal-event" style="border-left: 4px solid ${getBadgeColor(p.durum)}">`;
@@ -650,10 +661,65 @@ function renderCalendar(customers) {
                 viewCustomer(info.event.extendedProps.id);
             }
         });
+        calendar.render();
     } else {
         calendar.removeAllEvents();
         calendar.addEventSource(events);
+        if (calendar.view) {
+            updateMonthlyCalendarStats(calendar.view);
+        }
     }
+}
+
+function updateMonthlyCalendarStats(view) {
+    if (!view || !view.currentStart) return;
+    const activeDate = view.currentStart;
+    const year = activeDate.getFullYear();
+    const month = activeDate.getMonth(); // 0-indexed
+
+    let monthRev = 0;
+    let monthDeposit = 0;
+    let monthPending = 0;
+    let monthEventCount = 0;
+
+    currentCalendarCustomers.forEach(c => {
+        if (!c.etkinlik_tarihi) return;
+
+        const parts = c.etkinlik_tarihi.split('-');
+        if (parts.length < 3) return;
+        const cYear = parseInt(parts[0], 10);
+        const cMonth = parseInt(parts[1], 10) - 1;
+
+        if (cYear === year && cMonth === month) {
+            monthEventCount++;
+
+            // Sadece Etkinlik Gerçekleşti olanlar ciro
+            if (c.durum === 'Etkinlik Gerçekleşti') {
+                monthRev += (c.toplam_fiyat || 0);
+            }
+
+            // Yatırılan Kapora
+            monthDeposit += (c.alinan_avans || 0);
+
+            // Bekleyen Tahsilat (İptal hariç kalan)
+            if (c.durum !== 'İptal') {
+                const kalan = (c.toplam_fiyat || 0) - (c.alinan_avans || 0) - (c.alinan_odeme || 0);
+                if (kalan > 0) {
+                    monthPending += kalan;
+                }
+            }
+        }
+    });
+
+    const revEl = document.getElementById('calMonthRevenue');
+    const depEl = document.getElementById('calMonthDeposit');
+    const pendEl = document.getElementById('calMonthPending');
+    const countEl = document.getElementById('calMonthCount');
+
+    if (revEl) revEl.textContent = monthRev.toLocaleString('tr-TR') + ' TL';
+    if (depEl) depEl.textContent = monthDeposit.toLocaleString('tr-TR') + ' TL';
+    if (pendEl) pendEl.textContent = monthPending.toLocaleString('tr-TR') + ' TL';
+    if (countEl) countEl.textContent = monthEventCount;
 }
 
 function getBadgeColor(durum) {

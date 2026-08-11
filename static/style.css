@@ -504,6 +504,62 @@ tbody tr:hover {
     padding: 2rem !important;
 }
 
+/* Calendar Stats Bar */
+.calendar-stats-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+}
+
+.cal-stat-card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(8px);
+    border: 1px solid #bce1f1;
+    border-radius: 0.75rem;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 4px 12px rgba(43, 112, 149, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.cal-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(43, 112, 149, 0.15);
+}
+
+.cal-stat-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #2b7095;
+}
+
+.cal-stat-value {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.cal-stat-sub {
+    font-size: 0.7rem;
+    color: #64748b;
+}
+
+/* Other month days styling */
+.fc-day-other {
+    background-color: rgba(240, 244, 248, 0.2) !important;
+    opacity: 0.35;
+}
+
+.fc-day-other .fc-daygrid-day-top,
+.fc-day-other .fc-daygrid-day-events {
+    visibility: hidden !important;
+}
+
 /* Month Title */
 .fc .fc-toolbar-title {
     font-family: 'Playfair Display', serif !important;
