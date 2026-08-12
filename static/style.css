@@ -324,6 +324,7 @@ tbody tr:hover {
     background-color: rgba(0, 0, 0, 0.5);
     align-items: center;
     justify-content: center;
+    padding: 1.5rem 1rem;
 }
 
 .modal.show {
@@ -332,22 +333,27 @@ tbody tr:hover {
 
 .modal-content {
     background-color: white;
-    padding: 2rem;
+    padding: 1.25rem 1.5rem 1.5rem;
     border-radius: 0.5rem;
     width: 100%;
-    max-width: 500px;
+    max-width: 520px;
+    max-height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     position: relative;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
 .close-modal {
     position: absolute;
-    top: 1rem;
-    right: 1.5rem;
+    top: 0.75rem;
+    right: 1rem;
     font-size: 1.5rem;
+    line-height: 1;
     font-weight: bold;
     cursor: pointer;
     color: #94a3b8;
+    z-index: 2;
 }
 
 .close-modal:hover {
@@ -355,30 +361,49 @@ tbody tr:hover {
 }
 
 .modal-content h2 {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+    padding-right: 2rem;
 }
 
 /* Forms */
 .form-group {
-    margin-bottom: 1.25rem;
+    margin-bottom: 0.85rem;
+}
+
+.form-row {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.form-row .form-group {
+    flex: 1 1 130px;
+    min-width: 0;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.3rem;
     font-weight: 500;
-    font-size: 0.9rem;
+    font-size: 0.82rem;
+    color: #475569;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
     width: 100%;
-    padding: 0.6rem;
+    padding: 0.5rem 0.6rem;
     border: 1px solid var(--border-color);
     border-radius: 0.375rem;
     font-family: inherit;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 60px;
 }
 
 .form-group input:focus,
@@ -874,14 +899,35 @@ tbody tr:hover {
     }
 
     /* Modals */
-    .modal-content {
-        width: 95%;
-        padding: 1.25rem;
-        margin: 10% auto;
+    .modal {
+        padding: 0.75rem;
+        align-items: flex-start;
     }
-    
-    .form-group[style*="flex"] {
-        min-width: 100% !important;
+
+    .modal-content {
+        width: 100%;
+        padding: 1rem 1rem 1.25rem;
+        max-height: 100%;
+    }
+
+    .modal-content h2 {
+        font-size: 1.1rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .form-group {
+        margin-bottom: 0.7rem;
+    }
+
+    /* 16px prevents iOS from zooming in on focus */
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        font-size: 16px;
+    }
+
+    .form-row {
+        gap: 0.6rem;
     }
 
     /* Login */

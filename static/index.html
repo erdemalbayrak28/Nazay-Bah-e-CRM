@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/tr.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
-    <link rel="stylesheet" href="/static/style.css?v=10">
+    <link rel="stylesheet" href="/static/style.css?v=11">
 </head>
 <body>
 
@@ -193,70 +193,74 @@
             <form id="customerForm">
                 <input type="hidden" id="customerId">
                 
-                <div class="form-group">
-                    <label for="ad_soyad">Ad Soyad</label>
-                    <input type="text" id="ad_soyad" name="ad_soyad" required placeholder="Müşterinin Adı Soyadı">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="ad_soyad">Ad Soyad</label>
+                        <input type="text" id="ad_soyad" name="ad_soyad" required placeholder="Adı Soyadı">
+                    </div>
+                    <div class="form-group">
+                        <label for="telefon">Telefon</label>
+                        <input type="text" id="telefon" name="telefon" required placeholder="05XX XXX XX XX">
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="telefon">Telefon</label>
-                    <input type="text" id="telefon" name="telefon" required placeholder="05XX XXX XX XX">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="kaynak">Kaynak</label>
+                        <select id="kaynak" name="kaynak" required>
+                            <option value="Instagram">Instagram</option>
+                            <option value="WhatsApp">WhatsApp</option>
+                            <option value="Telefon">Telefon</option>
+                            <option value="Yüz Yüze">Yüz Yüze</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="durum">Durum</label>
+                        <select id="durum" name="durum" required>
+                            <option value="Yeni Ulaştı">Yeni Ulaştı</option>
+                            <option value="Görüşüldü">Görüşüldü</option>
+                            <option value="Randevu Oluşturuldu">Randevu Oluşturuldu</option>
+                            <option value="Etkinlik Gerçekleşti">Etkinlik Gerçekleşti</option>
+                            <option value="İptal">İptal</option>
+                        </select>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="kaynak">Kaynak</label>
-                    <select id="kaynak" name="kaynak" required>
-                        <option value="Instagram">Instagram</option>
-                        <option value="WhatsApp">WhatsApp</option>
-                        <option value="Telefon">Telefon</option>
-                        <option value="Yüz Yüze">Yüz Yüze</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="durum">Durum</label>
-                    <select id="durum" name="durum" required>
-                        <option value="Yeni Ulaştı">Yeni Ulaştı</option>
-                        <option value="Görüşüldü">Görüşüldü</option>
-                        <option value="Randevu Oluşturuldu">Randevu Oluşturuldu</option>
-                        <option value="Etkinlik Gerçekleşti">Etkinlik Gerçekleşti</option>
-                        <option value="İptal">İptal</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="etkinlik_adi">Etkinlik Adı (Opsiyonel)</label>
-                    <select id="etkinlik_adi" name="etkinlik_adi">
-                        <option value="">Belirtilmemiş</option>
-                        <option value="Nişan">Nişan</option>
-                        <option value="Kına">Kına</option>
-                        <option value="Kahvaltı">Kahvaltı</option>
-                        <option value="Bride to Be">Bride to Be</option>
-                        <option value="Doğum Günü">Doğum Günü</option>
-                    </select>
-                </div>
-
-                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                    <div class="form-group" style="flex: 1; min-width: 150px;">
-                        <label for="etkinlik_tarihi">Etkinlik Tarihi (Opsiyonel)</label>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="etkinlik_adi">Etkinlik Adı</label>
+                        <select id="etkinlik_adi" name="etkinlik_adi">
+                            <option value="">Belirtilmemiş</option>
+                            <option value="Nişan">Nişan</option>
+                            <option value="Kına">Kına</option>
+                            <option value="Kahvaltı">Kahvaltı</option>
+                            <option value="Bride to Be">Bride to Be</option>
+                            <option value="Doğum Günü">Doğum Günü</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="etkinlik_tarihi">Etkinlik Tarihi</label>
                         <input type="date" id="etkinlik_tarihi" name="etkinlik_tarihi">
                     </div>
-                    <div class="form-group" style="flex: 1; min-width: 100px;">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
                         <label for="kisi_sayisi">Kişi Sayısı</label>
                         <input type="number" id="kisi_sayisi" name="kisi_sayisi" min="0" placeholder="Örn: 100">
                     </div>
-                </div>
-                
-                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                    <div class="form-group" style="flex: 1; min-width: 120px;">
+                    <div class="form-group">
                         <label for="toplam_fiyat">Toplam Fiyat (TL)</label>
                         <input type="number" id="toplam_fiyat" name="toplam_fiyat" value="0" min="0">
                     </div>
-                    <div class="form-group" style="flex: 1; min-width: 120px;">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
                         <label for="alinan_avans">Kapora (TL)</label>
                         <input type="number" id="alinan_avans" name="alinan_avans" value="0" min="0">
                     </div>
-                    <div class="form-group" style="flex: 1; min-width: 120px;">
+                    <div class="form-group">
                         <label for="alinan_odeme">Alınan Ödeme (TL)</label>
                         <input type="number" id="alinan_odeme" name="alinan_odeme" value="0" min="0">
                     </div>
@@ -264,7 +268,7 @@
 
                 <div class="form-group">
                     <label for="notlar">Notlar (Opsiyonel)</label>
-                    <textarea id="notlar" name="notlar" rows="3" placeholder="Müşteri hakkında notlar..."></textarea>
+                    <textarea id="notlar" name="notlar" rows="2" placeholder="Müşteri hakkında notlar..."></textarea>
                 </div>
 
                 <button type="submit" class="btn btn-primary full-width">Kaydet</button>
@@ -289,7 +293,7 @@
         <div class="modal-content" style="max-width: 650px;">
             <span class="close-modal stat-details-close">&times;</span>
             <h2 id="statDetailsTitle">Detay Listesi</h2>
-            <div id="statDetailsContent" style="max-height: 420px; overflow-y: auto; margin-top: 1rem;">
+            <div id="statDetailsContent" style="max-height: min(420px, 55vh); overflow-y: auto; margin-top: 1rem;">
                 <!-- Populated via JS -->
             </div>
             <button id="closeStatDetailsBtn" class="btn btn-primary full-width" style="margin-top: 1rem;">Kapat</button>
